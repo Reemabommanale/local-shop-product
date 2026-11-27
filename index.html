@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% from "stock.html" import badge %}
+{% block content %}
+<section class="hero p-4 p-md-5 mb-4">
+ <h1 class="mb-2">Is it in stock at a shop near you?</h1>
+ <p class="mb-4 text-white-50">Search a product, compare prices across local shops and check availability before you leave home.</p>
+ <div class="bg-white text-dark rounded p-3">{% set term = '' %}{% include "search_form.html" %}</div>
+</section>
+
+<h2 class="h5">Browse by category</h2>
+<div class="d-flex flex-wrap gap-2 mb-4">
+ {% for c in categories %}<a class="btn btn-outline-dark btn-sm" href="{{ url_for('search', category=c.category_id) }}">{{ c.category_name }}</a>
+ {% else %}<span class="text-muted">No categories yet. The admin needs to add some.</span>{% endfor %}
+</div>
+
+<div class="row g-4">
+ <div class="col-lg-6">
+  <h2 class="h5">Recently updated, in stock</h2>
+  {% for r in recent %}
+   <div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-center">
+    <div><div class="fw-semibold">{{ r.product_name }}</div><a class="small" href="{{ url_for('shop', shop_id=r.shop_id) }}">{{ r.shop_name }}</a></div>
+    <div class="text-end"><div class="price">{{ r.price|inr }}</div>{{ badge(r.quantity) }}</div>
+   </div></div>
+  {% else %}<p class="text-muted">No products listed yet. Shop owners can register and add stock.</p>{% endfor %}
+ </div>
+ <div class="col-lg-6">
+  <h2 class="h5">Shops on the platform</h2>
+  {% for s in shops %}
+   <div class="card mb-2"><div class="card-body py-2">
+    <a class="fw-semibold" href="{{ url_for('shop', shop_id=s.shop_id) }}">{{ s.shop_name }}</a>
+    <div class="small text-muted">{{ s.address }}{% if s.opening_hours %}. Open {{ s.opening_hours }}{% endif %}</div>
+   </div></div>
+  {% else %}<p class="text-muted">No approved shops yet.</p>{% endfor %}
+ </div>
+</div>
+{% endblock %}

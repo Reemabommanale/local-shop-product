@@ -1,0 +1,4 @@
+{% macro badge(qty) -%}
+{%- if qty > 0 -%}<span class="badge text-bg-success">In stock{% if qty <= 3 %} (only {{ qty }} left){% endif %}</span>
+{%- else -%}<span class="badge text-bg-secondary">Out of stock</span>{%- endif -%}
+{%- endmacro %}

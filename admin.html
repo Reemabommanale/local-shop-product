@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<h1 class="h3">Admin dashboard</h1>
+<div class="row g-3 mb-4 text-center">
+ <div class="col-6 col-md-3"><div class="card card-body"><div class="h3 mb-0">{{ stats.customers }}</div>Customers</div></div>
+ <div class="col-6 col-md-3"><div class="card card-body"><div class="h3 mb-0">{{ stats.shops }}</div>Shops</div></div>
+ <div class="col-6 col-md-3"><div class="card card-body"><div class="h3 mb-0">{{ stats.pending }}</div>Awaiting approval</div></div>
+ <div class="col-6 col-md-3"><div class="card card-body"><div class="h3 mb-0">{{ stats.listings }}</div>Product listings</div></div>
+</div>
+
+<h2 class="h5">Shops</h2>
+<div class="table-responsive"><table class="table align-middle bg-white">
+ <thead><tr><th>Shop</th><th>Owner</th><th>Listings</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+ {% for s in shops %}<tr>
+  <td>{{ s.shop_name }}<div class="small text-muted">{{ s.address }}, {{ s.phone }}</div></td>
+  <td>{{ s.owner_name }}<div class="small text-muted">{{ s.owner_email }}</div></td>
+  <td>{{ s.item_count }}</td>
+  <td><span class="badge text-bg-{{ {'approved':'success','pending':'warning','rejected':'danger'}[s.status] }}">{{ s.status }}</span></td>
+  <td><form method="post" class="d-flex flex-wrap gap-1">{{ csrf_field() }}
+   <button class="btn btn-sm btn-brand" formaction="{{ url_for('admin_shop_action', shop_id=s.shop_id, action='approve') }}">Approve</button>
+   <button class="btn btn-sm btn-outline-dark" formaction="{{ url_for('admin_shop_action', shop_id=s.shop_id, action='reject') }}">Reject</button>
+   <button class="btn btn-sm btn-outline-danger" formaction="{{ url_for('admin_shop_action', shop_id=s.shop_id, action='delete') }}" onclick="return confirm('Delete this shop and its owner account?')">Delete</button>
+  </form></td></tr>
+ {% else %}<tr><td colspan="5" class="text-muted">No shops registered yet.</td></tr>{% endfor %}
+</tbody></table></div>
+
+<h2 class="h5 mt-4">Categories</h2>
+<form method="post" action="{{ url_for('admin_category') }}" class="d-flex gap-2 mb-2">{{ csrf_field() }}
+ <input name="category_name" class="form-control" style="max-width:20rem" maxlength="60" placeholder="New category" required aria-label="Category name">
+ <button class="btn btn-brand">Add category</button></form>
+<p>{% for c in categories %}<span class="badge text-bg-light border">{{ c.category_name }}</span> {% endfor %}</p>
+
+<h2 class="h5 mt-4">Users</h2>
+<div class="table-responsive"><table class="table align-middle bg-white">
+ <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th></th></tr></thead><tbody>
+ {% for u in users %}<tr><td>{{ u.name }}</td><td>{{ u.email }}</td><td>{{ u.role }}</td><td class="small">{{ u.created_at|stamp }}</td>
+  <td>{% if u.role != 'admin' %}<form method="post" action="{{ url_for('admin_user_delete', user_id=u.user_id) }}">{{ csrf_field() }}<button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this user?')">Delete</button></form>{% endif %}</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

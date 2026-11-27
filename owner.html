@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% from "stock.html" import badge %}
+{% block title %}My shop{% endblock %}
+{% block content %}
+<h1 class="h3">{{ shop.shop_name }}</h1>
+{% if shop.status == 'pending' %}<div class="alert alert-warning">Waiting for admin approval. Customers cannot see your shop yet.</div>
+{% elif shop.status == 'rejected' %}<div class="alert alert-danger">The admin rejected this shop listing. Update your details or contact the admin.</div>{% endif %}
+
+<div class="row g-3 mb-4 text-center">
+ <div class="col-4"><div class="card card-body"><div class="h3 mb-0">{{ total }}</div>Products listed</div></div>
+ <div class="col-4"><div class="card card-body"><div class="h3 mb-0">{{ in_stock }}</div>In stock</div></div>
+ <div class="col-4"><div class="card card-body"><div class="h3 mb-0">{{ out }}</div>Out of stock</div></div>
+</div>
+
+<h2 class="h5">Add or update a product</h2>
+<form method="post" action="{{ url_for('owner_add') }}" class="card card-body mb-4">
+ {{ csrf_field() }}
+ <div class="row g-2">
+  <div class="col-md-4"><label class="form-label" for="product_name">Product name</label><input id="product_name" name="product_name" class="form-control" maxlength="150" required placeholder="Samsung 25W Charger"></div>
+  <div class="col-md-3"><label class="form-label" for="category_id">Category</label><select id="category_id" name="category_id" class="form-select" required><option value="">Choose</option>{% for c in categories %}<option value="{{ c.category_id }}">{{ c.category_name }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><label class="form-label" for="price">Price (INR)</label><input id="price" name="price" class="form-control" inputmode="decimal" required></div>
+  <div class="col-md-2"><label class="form-label" for="quantity">Quantity</label><input id="quantity" name="quantity" class="form-control" inputmode="numeric" value="1" required></div>
+  <div class="col-md-1 d-flex align-items-end"><button class="btn btn-brand w-100">Save</button></div>
+ </div>
+ <div class="form-text">Adding a product you already listed in the same category updates its price and stock.</div>
+</form>
+
+<h2 class="h5">Your stock</h2>
+{% if inv %}
+<div class="table-responsive"><table class="table align-middle bg-white">
+ <thead><tr><th>Product</th><th>Status</th><th>Updated</th><th>Price, quantity and actions</th></tr></thead><tbody>
+ {% for r in inv %}<tr>
+  <td>{{ r.product_name }}<div class="small text-muted">{{ r.category_name }}</div></td>
+  <td>{{ badge(r.quantity) }}</td>
+  <td class="small text-muted">{{ r.updated_at|stamp }}</td>
+  <td><form method="post" action="{{ url_for('owner_update', inv_id=r.inventory_id) }}" class="d-flex flex-wrap gap-2">
+   {{ csrf_field() }}
+   <input name="price" class="form-control form-control-sm" style="width:6.5rem" value="{{ r.price }}" aria-label="Price" inputmode="decimal">
+   <input name="quantity" class="form-control form-control-sm" style="width:5rem" value="{{ r.quantity }}" aria-label="Quantity" inputmode="numeric">
+   <button class="btn btn-sm btn-brand">Update</button>
+   <button class="btn btn-sm btn-outline-danger" formaction="{{ url_for('owner_delete', inv_id=r.inventory_id) }}" onclick="return confirm('Remove this product from your shop?')">Delete</button>
+  </form></td></tr>{% endfor %}
+</tbody></table></div>
+{% else %}<p class="text-muted">No products yet. Add your first product above.</p>{% endif %}
+
+<h2 class="h5 mt-4">Customer enquiries</h2>
+{% for e in enq %}
+ <div class="card mb-2"><div class="card-body py-2">
+  <div class="small text-muted">{{ e.customer }} ({{ e.customer_email }}), {{ e.created_at|stamp }}{% if e.product_name %}. About {{ e.product_name }}{% endif %}</div>
+  <div>{{ e.message }}</div></div></div>
+{% else %}<p class="text-muted">No enquiries yet.</p>{% endfor %}
+
+<details class="mt-4"><summary class="h5">Edit shop profile</summary>
+ <form method="post" action="{{ url_for('owner_shop') }}" class="card card-body mt-2">
+  {{ csrf_field() }}{% set s = shop %}{% include "shop_fields.html" %}
+  <button class="btn btn-brand align-self-start mt-3">Save profile</button>
+ </form>
+</details>
+{% endblock %}

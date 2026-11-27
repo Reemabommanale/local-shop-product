@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "stock.html" import badge %}
+{% block title %}Search results{% endblock %}
+{% block content %}
+<div class="mb-4">{% include "search_form.html" %}</div>
+{% if not searched %}
+ <p class="text-muted">Type a product name or pick a category to see which shops have it.</p>
+{% elif not results %}
+ <div class="alert alert-info">No approved shop lists this product yet. Try a shorter name or another category.</div>
+{% else %}
+ <p class="text-muted">{{ results|length }} listing(s). In-stock shops come first.</p>
+ <div class="table-responsive"><table class="table align-middle bg-white">
+  <thead><tr><th>Shop</th><th>Product</th><th>Price</th><th>Stock</th><th>Distance</th><th>Updated</th></tr></thead>
+  <tbody>
+  {% for r in results %}
+   <tr>
+    <td><a class="fw-semibold" href="{{ url_for('shop', shop_id=r.shop_id) }}">{{ r.shop_name }}</a><div class="small text-muted">{{ r.address }}</div></td>
+    <td>{{ r.product_name }}</td>
+    <td class="price">{{ r.price|inr }}</td>
+    <td>{{ badge(r.quantity) }}</td>
+    <td>{% if r.dist is not none %}{{ '%.1f'|format(r.dist) }} km{% else %}-{% endif %}</td>
+    <td class="small text-muted">{{ r.updated_at|stamp }}</td>
+   </tr>
+  {% endfor %}
+  </tbody></table></div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,25 @@
+<form action="{{ url_for('search') }}" method="get" class="row g-2">
+ <div class="col-md-5"><label class="visually-hidden" for="q">Product</label>
+  <input id="q" name="q" class="form-control form-control-lg" placeholder="Product, e.g. Samsung 25W charger" value="{{ term or '' }}" maxlength="100"></div>
+ <div class="col-md-3"><label class="visually-hidden" for="category">Category</label>
+  <select id="category" name="category" class="form-select form-select-lg"><option value="">All categories</option>
+  {% for c in categories %}<option value="{{ c.category_id }}" {{ 'selected' if cat == c.category_id }}>{{ c.category_name }}</option>{% endfor %}</select></div>
+ <div class="col-md-2"><label class="visually-hidden" for="sort">Sort</label>
+  <select id="sort" name="sort" class="form-select form-select-lg"><option value="price">Lowest price</option><option value="distance" {{ 'selected' if sort == 'distance' }}>Nearest</option></select></div>
+ <div class="col-md-2 d-grid"><button class="btn btn-accent btn-lg">Search</button></div>
+ <input type="hidden" name="lat" id="lat" value="{{ '' if lat is none else lat }}">
+ <input type="hidden" name="lng" id="lng" value="{{ '' if lng is none else lng }}">
+ <div class="col-12"><button type="button" class="btn btn-link p-0 text-reset" id="geo">Use my location for distances</button> <span id="geo-msg" class="small"></span></div>
+</form>
+<script>
+document.getElementById('geo').addEventListener('click',function(){
+ var m=document.getElementById('geo-msg');
+ if(!navigator.geolocation){m.textContent='Location is not supported in this browser.';return;}
+ m.textContent='Locating...';
+ navigator.geolocation.getCurrentPosition(function(p){
+  document.getElementById('lat').value=p.coords.latitude.toFixed(6);
+  document.getElementById('lng').value=p.coords.longitude.toFixed(6);
+  m.textContent='Location added. Pick "Nearest" to sort by distance.';
+ },function(){m.textContent='Location is blocked. Allow it in your browser to see distances.';});
+});
+</script>

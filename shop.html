@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "stock.html" import badge %}
+{% block title %}{{ s.shop_name }}{% endblock %}
+{% block content %}
+<div class="card mb-4"><div class="card-body">
+ <h1 class="h3">{{ s.shop_name }}</h1>
+ <p class="mb-1">{{ s.address }}</p>
+ {% if s.opening_hours %}<p class="mb-1 text-muted">Open {{ s.opening_hours }}</p>{% endif %}
+ <p class="mb-3">Phone: {{ s.phone }}</p>
+ <div class="d-flex flex-wrap gap-2">
+  <a class="btn btn-brand" href="tel:{{ s.phone }}">Call shop</a>
+  <a class="btn btn-success" href="https://wa.me/91{{ s.phone }}" target="_blank" rel="noopener">WhatsApp</a>
+  <a class="btn btn-outline-dark" target="_blank" rel="noopener" href="{% if s.lat is not none and s.lng is not none %}https://www.google.com/maps/search/?api=1&query={{ s.lat }},{{ s.lng }}{% else %}https://www.google.com/maps/search/?api=1&query={{ s.address|urlencode }}{% endif %}">Get directions</a>
+ </div>
+</div></div>
+
+<h2 class="h5">Products in this shop</h2>
+{% if inv %}
+<div class="table-responsive"><table class="table align-middle bg-white">
+ <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Updated</th></tr></thead><tbody>
+ {% for r in inv %}<tr><td>{{ r.product_name }}</td><td>{{ r.category_name }}</td><td class="price">{{ r.price|inr }}</td><td>{{ badge(r.quantity) }}</td><td class="small text-muted">{{ r.updated_at|stamp }}</td></tr>{% endfor %}
+</tbody></table></div>
+{% else %}<p class="text-muted">This shop has not listed any products yet.</p>{% endif %}
+
+<h2 class="h5 mt-4">Ask the shop</h2>
+{% if session.role == 'customer' %}
+<form method="post" action="{{ url_for('enquire', shop_id=s.shop_id) }}" class="card card-body">
+ {{ csrf_field() }}
+ <div class="mb-2"><label class="form-label" for="product_id">About a product (optional)</label>
+  <select id="product_id" name="product_id" class="form-select"><option value="">General question</option>
+  {% for r in inv %}<option value="{{ r.product_id }}">{{ r.product_name }}</option>{% endfor %}</select></div>
+ <div class="mb-2"><label class="form-label" for="message">Message</label>
+  <textarea id="message" name="message" class="form-control" rows="3" maxlength="500" required></textarea></div>
+ <button class="btn btn-brand align-self-start">Send enquiry</button>
+</form>
+{% elif not session.uid %}
+ <p><a href="{{ url_for('login') }}">Log in</a> or <a href="{{ url_for('register') }}">create a customer account</a> to send an enquiry.</p>
+{% endif %}
+{% endblock %}

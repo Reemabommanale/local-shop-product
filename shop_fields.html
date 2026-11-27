@@ -1,0 +1,9 @@
+<div class="row g-2">
+ <div class="col-md-6"><label class="form-label" for="shop_name">Shop name</label><input id="shop_name" name="shop_name" class="form-control" maxlength="120" value="{{ s.get('shop_name') or '' }}"></div>
+ <div class="col-md-6"><label class="form-label" for="phone">Mobile number (10 digits)</label><input id="phone" name="phone" class="form-control" maxlength="20" inputmode="numeric" value="{{ s.get('phone') or '' }}"></div>
+ <div class="col-12"><label class="form-label" for="address">Address</label><input id="address" name="address" class="form-control" maxlength="255" value="{{ s.get('address') or '' }}"></div>
+ <div class="col-12"><label class="form-label" for="opening_hours">Opening hours</label><input id="opening_hours" name="opening_hours" class="form-control" maxlength="100" placeholder="Mon-Sat 9 AM to 9 PM" value="{{ s.get('opening_hours') or '' }}"></div>
+ <div class="col-md-6"><label class="form-label" for="slat">Latitude (optional)</label><input id="slat" name="lat" class="form-control" value="{{ '' if s.get('lat') is none else s.get('lat') }}"></div>
+ <div class="col-md-6"><label class="form-label" for="slng">Longitude (optional)</label><input id="slng" name="lng" class="form-control" value="{{ '' if s.get('lng') is none else s.get('lng') }}"></div>
+ <div class="col-12 form-text">Right-click your shop in Google Maps and copy the two numbers to enable distances for customers.</div>
+</div>
